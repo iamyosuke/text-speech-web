@@ -3,135 +3,166 @@
 ## アーキテクチャ概要
 ```mermaid
 graph TD
-    Client[クライアント層]
-    API[APIレイヤー]
-    Services[サービス層]
-    External[外部サービス]
-    DB[データベース]
-
-    Client -->|HTTP/WebSocket| API
-    API -->|処理委譲| Services
-    Services -->|API呼出| External
-    Services -->|CRUD| DB
+    Client[クライアントコンポーネント] --> |1. 音声認識| Speech[Web Speech API]
+    Speech --> |2. テキスト変換| Client
+    Client --> |3. テキスト処理| Server[サーバーコンポーネント]
+    Server --> |4. AI処理| Action[Server Actions]
+    Action --> |5. データ永続化| DB[データベース]
 ```
 
-## 主要コンポーネント構成
-1. クライアント層（Next.js）
-   - ページコンポーネント
-   - 共通UIコンポーネント
-   - カスタムフック
-   - 状態管理（React Query）
+## システムレイヤー
+### 1. プレゼンテーション層
+- Server Componentsを優先使用
+- Client Componentsは音声認識など必要な機能のみに限定
+- アトミックデザインベースのコンポーネント構造
+  ```
+  components/
+  ├── atoms/
+  │   └── RecordButton.tsx
+  ├── molecules/
+  │   ├── TranscriptDisplay.tsx
+  │   └── AIResponseDisplay.tsx
+  └── client/
+      └── RecordingSection.tsx
+  ```
 
-2. APIレイヤー（Next.js API Routes）
-   - エンドポイント定義
-   - バリデーション
-   - エラーハンドリング
-   - レスポンス整形
+### 2. サーバーサイド構造
+- Server Actionsによるテキスト処理
+  ```
+  actions/
+  └── processTranscript.ts
+  ```
+- セッション管理
+  ```
+  lib/
+  └── session.ts
+  ```
 
-3. サービス層
-   - 音声処理サービス
-   - AI対話サービス
-   - セッション管理サービス
-   - データアクセスサービス
+### 3. データ層
+- Drizzle ORMによるデータ管理
+  ```
+  db/
+  ├── index.ts
+  └── schema.ts
+  ```
+- マイグレーション管理
+  ```
+  drizzle/
+  ├── 0000_sweet_spirit.sql
+  ├── 0001_cuddly_synch.sql
+  └── 0002_aberrant_millenium_guard.sql
+  ```
 
-4. 外部サービス連携
-   - OpenAI Whisper API
-   - OpenAI GPT-4 API
-   - Supabase
-
-## データモデル
+## データフロー
 ```mermaid
-erDiagram
-    Session ||--o{ Message : contains
-    Session {
-        string id
-        string title
-        timestamp created_at
-        string summary
-    }
-    Message {
-        string id
-        string session_id
-        string content
-        string type
-        timestamp created_at
-        string audio_url
-    }
+sequenceDiagram
+    participant User as ユーザー
+    participant Speech as Web Speech API
+    participant Client as RecordingSection
+    participant Server as Server Action
+    participant DB as Database
+
+    User->>Client: 録音開始
+    Client->>Speech: 音声認識開始
+    Speech-->>Client: テキスト変換
+    Client->>Server: テキスト処理リクエスト
+    Server->>DB: セッション保存
+    DB-->>Server: 保存完了
+    Server-->>Client: 処理結果
+    Client-->>User: 結果表示
 ```
 
-## 技術スタック選定理由
-1. Next.js
-   - App Routerによる最新機能
-   - APIルートの統合
-   - SSRとCSRの柔軟な選択
-   - TypeScript完全サポート
+## 実装パターン
+### 1. 音声認識パターン
+```typescript
+// カスタムフック実装
+const useVoiceRecognition = () => {
+  // Web Speech API実装
+  // ステート管理
+  // 音声認識制御
+};
+```
 
-2. Supabase
-   - スキーマレス対応
-   - リアルタイム機能
-   - 認証機能（将来対応）
-   - PostgreSQLベース
+### 2. Server Actionパターン
+```typescript
+// テキスト処理アクション
+export async function processTranscript(text: string) {
+  // AI処理
+  // データ永続化
+  // 結果返却
+}
+```
 
-3. TailwindCSS
-   - 高速な開発
-   - カスタマイズ容易
-   - レスポンシブ対応
-   - ユーティリティファースト
+### 3. セッション管理パターン
+```typescript
+// セッションサービス
+export class SessionManager {
+  // セッション作成
+  // 状態管理
+  // データ永続化
+}
+```
 
-## 設計パターン
-1. Atomic Design
-   - コンポーネント分割の方針
-   - 再利用性の向上
-   - 保守性の確保
+## エラー処理
+1. **音声認識エラー**
+   - 認識失敗時のリトライ
+   - ユーザーへのフィードバック
+   - フォールバック手段の提供
 
-2. Custom Hooks
-   - ロジック分離
-   - 状態管理
-   - 再利用性
+2. **AI処理エラー**
+   - リクエスト制限の管理
+   - エラー時の代替レスポンス
+   - 処理状態の表示
 
-3. Repository Pattern
-   - データアクセス抽象化
-   - テスト容易性
-   - 依存性の制御
+3. **セッションエラー**
+   - セッション復旧メカニズム
+   - データ整合性の確保
+   - エラーログの記録
 
-## API設計
-1. RESTful API
-   ```typescript
-   // セッション関連
-   POST   /api/sessions
-   GET    /api/sessions
-   GET    /api/sessions/:id
-   PUT    /api/sessions/:id
-   DELETE /api/sessions/:id
+## パフォーマンス最適化
+1. **音声認識**
+   - ストリーミング処理の最適化
+   - メモリ使用量の管理
+   - バッファリング制御
 
-   // メッセージ関連
-   POST   /api/sessions/:id/messages
-   GET    /api/sessions/:id/messages
-   PUT    /api/messages/:id
-   DELETE /api/messages/:id
+2. **Server Components**
+   - 適切なキャッシング戦略
+   - 選択的ハイドレーション
+   - ストリーミングレンダリング
 
-   // 音声処理
-   POST   /api/speech-to-text
-   ```
-
-2. WebSocket（将来対応）
-   ```typescript
-   // リアルタイムメッセージ
-   ws://api/sessions/:id/realtime
-   ```
+3. **データ管理**
+   - クエリの最適化
+   - インデックス設計
+   - コネクションプール管理
 
 ## セキュリティ考慮事項
-1. 入力データ検証
-   - zod/yupによるバリデーション
-   - サニタイズ処理
+1. **入力検証**
+   - 音声データの検証
+   - テキストサニタイズ
+   - パラメータバリデーション
+
+2. **セッション保護**
+   - トークン管理
+   - タイムアウト制御
    - CSRF対策
 
-2. API保護
-   - レート制限
-   - CORS設定
-   - APIキー管理
-
-3. データ保護
+3. **データ保護**
    - 暗号化
    - アクセス制御
-   - バックアップ
+   - 監査ログ
+
+## 拡張性への配慮
+1. **新機能追加**
+   - モジュラー設計
+   - プラグインアーキテクチャ
+   - 設定の外部化
+
+2. **スケーリング**
+   - 水平スケーリング対応
+   - キャッシュ戦略
+   - 負荷分散設計
+
+3. **カスタマイズ**
+   - 設定可能なパラメータ
+   - フック機構
+   - APIの抽象化

@@ -1,135 +1,205 @@
 # 技術コンテキスト
 
-## 開発環境
-1. 必要なツール
-   - Node.js v20.x以上
-   - npm v10.x以上
-   - Git
-   - VSCode（推奨）
+## 技術スタック
+### フロントエンド
+- **Next.js** - Reactフレームワーク
+  - App Router
+  - Server Components（優先使用）
+  - Client Components（音声認識機能用）
+  - Server Actions（テキスト処理）
 
-2. VSCode推奨拡張機能
-   - ESLint
-   - Prettier
-   - Tailwind CSS IntelliSense
-   - TypeScript Vue Plugin
-   - Error Lens
+### バックエンド
+- **Server Actions** - サーバーサイド処理
+- **Web Speech API** - 音声認識
+- **OpenAI API** - テキスト処理
 
-## プロジェクト依存関係
-```json
-{
-  "dependencies": {
-    "next": "14.x",
-    "react": "18.x",
-    "react-dom": "18.x",
-    "tailwindcss": "3.x",
-    "@tanstack/react-query": "5.x",
-    "@supabase/supabase-js": "2.x",
-    "zod": "3.x",
-    "openai": "4.x"
-  },
-  "devDependencies": {
-    "typescript": "5.x",
-    "@types/react": "18.x",
-    "@types/node": "20.x",
-    "eslint": "8.x",
-    "prettier": "3.x",
-    "@typescript-eslint/eslint-plugin": "6.x",
-    "@typescript-eslint/parser": "6.x"
-  }
+### データ層
+- **Drizzle ORM** - データベース操作
+  - 型安全なクエリ構築
+  - スキーマファーストアプローチ
+  - マイグレーション管理
+
+### フロントエンド型定義
+```typescript
+// アプリケーションの型定義
+interface VoiceRecognitionState {
+  isRecording: boolean;
+  transcript: string;
+  error: Error | null;
+}
+
+interface AIResponse {
+  content: string;
+  timestamp: string;
+  sessionId: string;
+}
+
+// Web Speech API型定義拡張
+interface CustomSpeechRecognition extends SpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
 }
 ```
 
-## 外部サービス連携
-1. OpenAI API
-   - Whisper API: 音声→テキスト変換
-   - GPT-4 API: AI対話処理
-   - 環境変数: OPENAI_API_KEY
+## プロジェクト構成
+```
+app/
+├── actions/              # Server Actions
+│   └── processTranscript.ts
+├── components/          # UIコンポーネント
+│   ├── atoms/
+│   │   └── RecordButton.tsx
+│   ├── molecules/
+│   │   ├── TranscriptDisplay.tsx
+│   │   └── AIResponseDisplay.tsx
+│   └── client/
+│       └── RecordingSection.tsx
+├── hooks/              # カスタムフック
+│   └── useVoiceRecognition.ts
+├── lib/               # ユーティリティ
+│   └── session.ts
+├── types/             # 型定義
+│   └── webSpeechAPI.d.ts
+└── db/               # データベース
+    ├── index.ts
+    └── schema.ts
+```
 
-2. Supabase
-   - Database: PostgreSQL
-   - Real-time subscriptions
-   - 環境変数:
-     - NEXT_PUBLIC_SUPABASE_URL
-     - NEXT_PUBLIC_SUPABASE_ANON_KEY
-     - SUPABASE_SERVICE_ROLE_KEY
+## 開発要件
+### 基本要件
+- Node.js >= 18.x
+- TypeScript 5.x（Strict Mode）
+- ESLint + Prettier
+- React 18.x
+- Next.js 14.x
 
-## インフラストラクチャ
-1. 開発環境
+### 環境変数
+```bash
+# OpenAI
+OPENAI_API_KEY=
+
+# Database
+DATABASE_URL=
+
+# Application
+NEXT_PUBLIC_APP_URL=
+```
+
+## API仕様
+### Web Speech API
+```typescript
+// 音声認識フック
+const useVoiceRecognition = () => {
+  const [state, setState] = useState<VoiceRecognitionState>({
+    isRecording: false,
+    transcript: '',
+    error: null
+  });
+
+  // 音声認識の初期化と制御
+  const startRecording = () => {/* ... */};
+  const stopRecording = () => {/* ... */};
+  
+  return { ...state, startRecording, stopRecording };
+};
+```
+
+### Server Actions
+```typescript
+// テキスト処理アクション
+export async function processTranscript(text: string): Promise<AIResponse> {
+  // OpenAI APIを使用したテキスト処理
+  // セッション管理
+  // データ永続化
+}
+```
+
+## データベーススキーマ
+```sql
+-- セッションテーブル
+CREATE TABLE sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- トランスクリプトテーブル
+CREATE TABLE transcripts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id UUID REFERENCES sessions(id),
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- AIレスポンステーブル
+CREATE TABLE ai_responses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  transcript_id UUID REFERENCES transcripts(id),
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## パフォーマンス要件
+1. **音声認識**
+   - レイテンシ: < 100ms
+   - 認識精度: > 95%
+   - メモリ使用: < 50MB
+
+2. **AI処理**
+   - 応答時間: < 2秒
+   - 同時処理: 10リクエスト/秒
+   - タイムアウト: 10秒
+
+3. **UI/UX**
+   - First Load: < 2秒
+   - Time to Interactive: < 3秒
+   - FPS: 60fps維持
+
+## セキュリティ要件
+1. **データ保護**
+   - 音声データの一時的な保持のみ
+   - テキストデータの暗号化保存
+   - セッションデータの適切な破棄
+
+2. **API保護**
+   - レート制限の実装
+   - APIキーのローテーション
+   - リクエストの検証
+
+3. **フロントエンド**
+   - XSS対策
+   - CSRF対策
+   - Content Security Policy
+
+## テスト要件
+1. **ユニットテスト**
+   - フックのテスト
+   - ユーティリティ関数のテスト
+   - コンポーネントのテスト
+
+2. **統合テスト**
+   - 音声認識フローのテスト
+   - AI処理フローのテスト
+   - データ永続化のテスト
+
+3. **E2Eテスト**
+   - ユーザーフローのテスト
+   - エラーハンドリングのテスト
+   - パフォーマンステスト
+
+## デプロイメント
+1. **開発環境**
    - ローカル開発サーバー
-   - Supabase Localプロジェクト
+   - テストデータベース
+   - モックAI応答
 
-2. 本番環境（将来）
-   - Vercel（Next.js）
-   - Supabase Cloud
-   - 独自ドメイン
+2. **ステージング環境**
+   - 本番同等の設定
+   - 完全なE2Eテスト
+   - パフォーマンステスト
 
-## 技術的制約
-1. ブラウザ対応
-   - Chrome最新版
-   - Safari最新版
-   - Firefox最新版
-   - Edge最新版
-
-2. 音声入力
-   - MediaRecorder API対応
-   - WebSocket接続
-   - マイク権限要求
-
-3. パフォーマンス目標
-   - 初期読み込み: 2秒以内
-   - 音声認識: 3秒以内
-   - AIレスポンス: 5秒以内
-
-## 開発プラクティス
-1. コーディング規約
-   ```typescript
-   // ファイル命名
-   components/
-     Button.tsx      // コンポーネント
-     useAuth.ts      // カスタムフック
-     types.ts        // 型定義
-   
-   // インポート順序
-   import React from 'react'      // React/Next
-   import { useQuery } from '...' // サードパーティ
-   import { Button } from '@/...' // 内部モジュール
-   ```
-
-2. ブランチ戦略
-   - main: 本番環境
-   - develop: 開発環境
-   - feature/*: 機能開発
-   - fix/*: バグ修正
-
-3. コミットメッセージ
-   ```
-   feat: 新機能追加
-   fix: バグ修正
-   docs: ドキュメント
-   style: スタイル調整
-   refactor: リファクタリング
-   test: テスト関連
-   chore: その他
-   ```
-
-## テスト戦略
-1. ユニットテスト
-   - Jest
-   - React Testing Library
-   - MSW（APIモック）
-
-2. E2Eテスト（将来）
-   - Playwright
-   - テストシナリオ
-   - CI/CD統合
-
-## モニタリング（将来）
-1. エラー追跡
-   - Sentry
-   - エラーレポート
-   - パフォーマンス計測
-
-2. アナリティクス
-   - Google Analytics
-   - ユーザー行動分析
-   - コンバージョン計測
+3. **本番環境**
+   - スケーリング設定
+   - モニタリング
+   - バックアップ体制
