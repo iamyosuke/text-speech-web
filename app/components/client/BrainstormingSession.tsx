@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { RecordingSection } from './RecordingSection';
 import { TranscriptDisplay } from '../molecules/TranscriptDisplay';
 import { AIResponseDisplay } from '../molecules/AIResponseDisplay';
-import type { AIResponse } from '@/app/actions/processTranscript';
+import type { AIResponse } from '@/app/(server)/actions/processTranscript';
 
 interface BrainstormingSessionProps {
   onTranscriptUpdate: (audioData: Blob, aiResponse: AIResponse) => Promise<void>;

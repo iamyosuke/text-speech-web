@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { RecordButton } from '../atoms/RecordButton';
-import { processAudioData } from '@/app/actions/processTranscript';
-import type { AIResponse } from '@/app/actions/processTranscript';
+import { processAudioData } from '@/app/(server)/actions/processTranscript';
+import type { AIResponse } from '@/app/(server)/actions/processTranscript';
 
 interface RecordingSectionProps {
   onTranscriptUpdate: (audioData: Blob, aiResponse: AIResponse) => void;

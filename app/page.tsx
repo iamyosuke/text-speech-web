@@ -1,6 +1,6 @@
 import { BrainstormingSession } from './components/client/BrainstormingSession';
-import type { AIResponse } from './actions/processTranscript';
-import { saveSession } from './actions/processTranscript';
+import type { AIResponse } from './(server)/actions/processTranscript';
+import { saveSession } from './(server)/actions/processTranscript';
 
 export default function Home() {
   async function handleTranscriptUpdate(audioData: Blob, aiResponse: AIResponse) {
