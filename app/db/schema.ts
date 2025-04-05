@@ -6,10 +6,3 @@ export const mySchema = pgSchema('text_speech_web');
 
 
 // ユーザーテーブル
-export const users = mySchema.table('users', {
-  id: uuid().primaryKey().defaultRandom(),
-  email: text().notNull().unique(),
-  fullName: text(),
-  createdAt: timestamp().defaultNow(),
-  updatedAt: timestamp().defaultNow(),
-});

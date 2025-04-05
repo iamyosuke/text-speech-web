@@ -1,0 +1,1 @@
+DROP TABLE "text_speech_web"."users" CASCADE;

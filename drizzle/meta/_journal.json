@@ -15,6 +15,13 @@
       "when": 1743864610479,
       "tag": "0001_cuddly_synch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1743864780487,
+      "tag": "0002_aberrant_millenium_guard",
+      "breakpoints": true
     }
   ]
 }
