@@ -13,13 +13,27 @@ export const RecordingSection = ({ onTranscriptUpdate }: RecordingSectionProps) 
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleRecording = async (audioBlob: Blob) => {
-    if (!audioBlob) return;
+    console.log('Recording handler called, received audio blob:', {
+      size: audioBlob?.size,
+      type: audioBlob?.type
+    });
+    
+    if (!audioBlob) {
+      console.log('No audio blob received, aborting processing');
+      return;
+    }
 
     try {
+      console.log('Starting audio processing...');
       setIsProcessing(true);
       const aiResponse = await processAudioData(audioBlob);
+      console.log('AI response received:', aiResponse);
       onTranscriptUpdate(audioBlob, aiResponse);
+      console.log('Transcript update completed');
+    } catch (error) {
+      console.error('Error processing audio:', error);
     } finally {
+      console.log('Processing completed, resetting state');
       setIsProcessing(false);
     }
   };
