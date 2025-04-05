@@ -11,6 +11,7 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.13.0",
     "better-sqlite3": "^11.9.1",
     "drizzle-kit": "^0.30.6",
     "drizzle-orm": "^0.41.0",
