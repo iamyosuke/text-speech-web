@@ -1,5 +1,7 @@
 {
   "name": "text-speech-web",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -7,15 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "hono": "^4.7.5",
-    "next": "14.2.5",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "15.2.4"
   },
   "devDependencies": {
-    "@types/node": "18.11.18",
-    "@types/react": "18.0.26",
-    "@types/react-dom": "18.0.10",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.4",
+    "@eslint/eslintrc": "^3"
   }
 }
