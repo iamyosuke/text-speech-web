@@ -1,12 +1,13 @@
 import { BrainstormingSession } from './components/client/BrainstormingSession';
 import type { AIResponse } from './actions/processTranscript';
+import { saveSession } from './actions/processTranscript';
 
 export default function Home() {
-  async function handleTranscriptUpdate(transcript: string, aiResponse: AIResponse) {
+  async function handleTranscriptUpdate(audioData: Blob, aiResponse: AIResponse) {
     'use server';
     
     // TODO: 後でデータベースに保存する実装を追加
-    console.log('Session updated:', { transcript, aiResponse });
+    await saveSession(audioData, aiResponse.response);
   }
 
   return (

@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useVoiceRecognition } from '@/app/hooks/useVoiceRecognition';
 
 type RecordButtonProps = {
-  onTranscriptUpdate: (transcript: string) => void;
+  onTranscriptUpdate: (audioBlob: Blob) => void;
 };
 
 export const RecordButton = ({ onTranscriptUpdate }: RecordButtonProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const { startRecording, stopRecording } = useVoiceRecognition({
-    onResult: (transcript) => {
-      onTranscriptUpdate(transcript);
+    onResult: (blob) => {
+      onTranscriptUpdate(blob);
     },
   });
 

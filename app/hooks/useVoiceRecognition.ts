@@ -1,55 +1,59 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
-import { VoiceRecognitionConfig, VoiceRecognitionHook } from '../types/webSpeechAPI';
+import { useCallback, useRef, useState } from 'react';
+import { VoiceRecognitionConfig, VoiceRecognitionHook, AudioRecordingState } from '../types/webSpeechAPI';
 
 export const useVoiceRecognition = ({ onResult }: VoiceRecognitionConfig): VoiceRecognitionHook => {
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const [recordingState, setRecordingState] = useState<AudioRecordingState>('inactive');
+  
   const isSupported = typeof window !== 'undefined' && 
-    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+    ('MediaRecorder' in window);
 
   const startRecording = useCallback(async () => {
     if (!isSupported) {
-      throw new Error('Speech recognition is not supported in this browser');
+      throw new Error('MediaRecorder is not supported in this browser');
     }
 
     try {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      
-      recognitionRef.current.lang = 'ja-JP';
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
 
-      recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0].transcript)
-          .join('');
-        onResult(transcript);
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
       };
 
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        onResult(blob);
+        chunksRef.current = [];
+        stream.getTracks().forEach(track => track.stop());
       };
 
-      recognitionRef.current.start();
+      mediaRecorder.start();
+      setRecordingState('recording');
     } catch (error) {
-      console.error('Error starting speech recognition:', error);
+      console.error('Error starting media recording:', error);
       throw error;
     }
   }, [isSupported, onResult]);
 
   const stopRecording = useCallback(async () => {
-    if (recognitionRef.current) {
+    if (mediaRecorderRef.current && recordingState === 'recording') {
       try {
-        recognitionRef.current.stop();
-        recognitionRef.current = null;
+        mediaRecorderRef.current.stop();
+        setRecordingState('inactive');
       } catch (error) {
-        console.error('Error stopping speech recognition:', error);
+        console.error('Error stopping media recording:', error);
         throw error;
       }
     }
-  }, []);
+  }, [recordingState]);
 
   return {
     startRecording,

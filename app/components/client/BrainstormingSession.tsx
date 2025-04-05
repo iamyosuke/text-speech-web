@@ -7,7 +7,7 @@ import { AIResponseDisplay } from '../molecules/AIResponseDisplay';
 import type { AIResponse } from '@/app/actions/processTranscript';
 
 interface BrainstormingSessionProps {
-  onTranscriptUpdate: (transcript: string, aiResponse: AIResponse) => Promise<void>;
+  onTranscriptUpdate: (audioData: Blob, aiResponse: AIResponse) => Promise<void>;
 }
 
 export const BrainstormingSession = ({ onTranscriptUpdate }: BrainstormingSessionProps) => {
@@ -15,11 +15,12 @@ export const BrainstormingSession = ({ onTranscriptUpdate }: BrainstormingSessio
   const [currentAIResponse, setCurrentAIResponse] = useState<AIResponse | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleUpdate = async (transcript: string, aiResponse: AIResponse) => {
-    setCurrentTranscript(transcript);
+  const handleUpdate = async (audioData: Blob, aiResponse: AIResponse) => {
+    // 一時的に音声データのサイズを表示
+    setCurrentTranscript(`録音データサイズ: ${Math.round(audioData.size / 1024)}KB`);
     setCurrentAIResponse(aiResponse);
     setIsProcessing(false);
-    await onTranscriptUpdate(transcript, aiResponse);
+    await onTranscriptUpdate(audioData, aiResponse);
   };
 
   return (

@@ -2,23 +2,23 @@
 
 import { useState } from 'react';
 import { RecordButton } from '../atoms/RecordButton';
-import { processTranscript } from '@/app/actions/processTranscript';
+import { processAudioData } from '@/app/actions/processTranscript';
 import type { AIResponse } from '@/app/actions/processTranscript';
 
 interface RecordingSectionProps {
-  onTranscriptUpdate: (transcript: string, aiResponse: AIResponse) => void;
+  onTranscriptUpdate: (audioData: Blob, aiResponse: AIResponse) => void;
 }
 
 export const RecordingSection = ({ onTranscriptUpdate }: RecordingSectionProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleTranscript = async (transcript: string) => {
-    if (!transcript.trim()) return;
+  const handleRecording = async (audioBlob: Blob) => {
+    if (!audioBlob) return;
 
     try {
       setIsProcessing(true);
-      const aiResponse = await processTranscript(transcript);
-      onTranscriptUpdate(transcript, aiResponse);
+      const aiResponse = await processAudioData(audioBlob);
+      onTranscriptUpdate(audioBlob, aiResponse);
     } finally {
       setIsProcessing(false);
     }
@@ -26,7 +26,7 @@ export const RecordingSection = ({ onTranscriptUpdate }: RecordingSectionProps) 
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <RecordButton onTranscriptUpdate={handleTranscript} />
+      <RecordButton onTranscriptUpdate={handleRecording} />
       {isProcessing && (
         <div className="text-sm text-gray-600">
           処理中...
