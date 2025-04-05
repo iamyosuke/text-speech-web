@@ -16,11 +16,26 @@ export const BrainstormingSession = ({ onTranscriptUpdate }: BrainstormingSessio
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleUpdate = async (audioData: Blob, aiResponse: AIResponse) => {
-    // 一時的に音声データのサイズを表示
-    setCurrentTranscript(`録音データサイズ: ${Math.round(audioData.size / 1024)}KB`);
-    setCurrentAIResponse(aiResponse);
-    setIsProcessing(false);
-    await onTranscriptUpdate(audioData, aiResponse);
+    try {
+      setIsProcessing(true);
+      
+      // 文字起こし結果を表示
+      setCurrentTranscript(aiResponse.transcript || '');
+      
+      // AI分析結果を表示
+      setCurrentAIResponse(aiResponse);
+      
+      // データを保存
+      await onTranscriptUpdate(audioData, aiResponse);
+    } catch (error) {
+      console.error('Error in handleUpdate:', error);
+      setCurrentAIResponse({
+        response: '',
+        error: 'データの処理中にエラーが発生しました。'
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (

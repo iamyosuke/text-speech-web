@@ -1,19 +1,27 @@
 'use server';
 
+import { AudioProcessor } from '../services/audio/audioProcessor';
+
 export interface AIResponse {
+  transcript?: string;
   response: string;
   error?: string;
 }
 
 export async function processAudioData(audioBlob: Blob): Promise<AIResponse> {
   try {
-    // TODO: Implement actual audio processing and AI service integration
-    // この部分は後で音声処理とAI APIと連携します
-    const mockResponse = {
-      response: `AIの応答：\n音声データを受け付けました。\n長さ: ${Math.round(audioBlob.size / 1024)}KB`,
-    };
+    const processor = new AudioProcessor();
+    
+    // 音声を文字起こし
+    const transcript = await processor.transcribe(audioBlob);
+    
+    // 文字起こし結果を分析
+    const analysis = await processor.analyze(transcript);
 
-    return mockResponse;
+    return {
+      response: analysis,
+      transcript: transcript
+    };
   } catch (error) {
     console.error('Error processing audio:', error);
     return {
