@@ -2,30 +2,23 @@ import { BrainstormingSession } from './components/client/BrainstormingSession';
 import { SessionManager } from './components/client/SessionManager';
 import type { AIResponse } from './(server)/actions/processTranscript';
 import { saveSession } from './(server)/actions/processTranscript';
+import { getSessions } from './(server)/actions/getSessions';
 
-export default function Home() {
+export default async function Home() {
   async function handleTranscriptUpdate(audioData: Blob, aiResponse: AIResponse) {
     'use server';
     await saveSession(audioData, aiResponse.response);
   }
 
-  // Note: This is a temporary mock data. In real implementation, 
-  // this would come from your database
-  const mockSessions = [
-    {
-      id: '1',
-      title: 'First Brainstorming Session',
-      date: '2024-04-06',
-    },
-    {
-      id: '2',
-      title: 'Product Ideas Discussion',
-      date: '2024-04-05',
-    },
-  ];
+  const sessions = await getSessions();
+  const formattedSessions = sessions.map(session => ({
+    id: session.id,
+    title: session.title,
+    date: session.createdAt.toLocaleDateString(),
+  }));
 
   return (
-    <SessionManager sessions={mockSessions}>
+    <SessionManager sessions={formattedSessions}>
       <BrainstormingSession onTranscriptUpdate={handleTranscriptUpdate} />
     </SessionManager>
   );

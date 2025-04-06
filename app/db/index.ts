@@ -1,8 +1,13 @@
-// src/db/index.ts
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
-import * as schema from "./schema.js";
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
 
-const sqlite = new Database(process.env.DATABASE_URL ?? "sqlite.db");
+const connectionString = process.env.DATABASE_URL!
 
-export const db = drizzle(sqlite, { schema });
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not set.')
+}
+
+const client = postgres(connectionString, { prepare: false })
+const db = drizzle(client);
+
+export default db;
