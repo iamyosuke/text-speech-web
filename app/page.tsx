@@ -26,16 +26,7 @@ export default function Home() {
 
   return (
     <SessionManager sessions={mockSessions}>
-      <h1 className="text-2xl md:text-3xl font-bold mb-8 text-gray-800">
-        Voice Brainstorming
-      </h1>
-      
       <BrainstormingSession onTranscriptUpdate={handleTranscriptUpdate} />
-
-      <footer className="mt-12 text-sm text-gray-500">
-        <p>Use voice input to brainstorm with AI.</p>
-        <p>Click &quot;Start Recording&quot; to begin.</p>
-      </footer>
     </SessionManager>
   );
 }

@@ -42,14 +42,14 @@ export const RecordButton = ({ onTranscriptUpdate }: RecordButtonProps) => {
     <div className="flex flex-col items-center gap-2">
       <button
         onClick={handleClick}
-        className={`rounded-full p-4 ${
+        className={`w-full px-8 py-3 rounded-lg flex justify-center items-center text-white font-medium transition-colors ${
           isRecording
             ? 'bg-red-500 hover:bg-red-600'
             : 'bg-blue-500 hover:bg-blue-600'
-        } text-white font-semibold transition-colors`}
+        }`}
         aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
       >
-        {isRecording ? '録音停止' : '録音開始'}
+        {isRecording ? '録音停止' : 'Start Recording'}
       </button>
       {error && (
         <div className="text-red-500 text-sm mt-2 max-w-md text-center">
