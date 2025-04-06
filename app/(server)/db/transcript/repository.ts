@@ -1,4 +1,4 @@
-import { db } from '@/app/db';
+import db from '@/app/db';
 import { eq, desc } from 'drizzle-orm';
 import { transcripts } from '@/app/db/schema';
 import type { CreateTranscriptParams, TranscriptData } from './types';
