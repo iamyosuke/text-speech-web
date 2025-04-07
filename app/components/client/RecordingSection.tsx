@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { RecordButton } from '../atoms/RecordButton';
 import { processAudioData } from '@/app/(server)/actions/processTranscript';
-import type { AIResponse } from '@/app/(server)/actions/processTranscript';
+import type { TranscriptionResult } from '@/app/(server)/actions/processTranscript';
 
 interface RecordingSectionProps {
-  onTranscriptUpdate: (audioData: Blob, aiResponse: AIResponse) => void;
+  onTranscriptUpdate: (audioData: Blob, transcription: TranscriptionResult) => void;
 }
 
 export const RecordingSection = ({ onTranscriptUpdate }: RecordingSectionProps) => {
@@ -26,9 +26,9 @@ export const RecordingSection = ({ onTranscriptUpdate }: RecordingSectionProps) 
     try {
       console.log('Starting audio processing...');
       setIsProcessing(true);
-      const aiResponse = await processAudioData(audioBlob);
-      console.log('AI response received:', aiResponse);
-      onTranscriptUpdate(audioBlob, aiResponse);
+      const transcription = await processAudioData(audioBlob);
+      console.log('Transcription received:', transcription);
+      onTranscriptUpdate(audioBlob, transcription);
       console.log('Transcript update completed');
     } catch (error) {
       console.error('Error processing audio:', error);
