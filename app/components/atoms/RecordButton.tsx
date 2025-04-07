@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useVoiceRecognition } from '@/app/hooks/useVoiceRecognition';
+import { Waveform } from './Waveform';
 
 type RecordButtonProps = {
   onTranscriptUpdate: (audioBlob: Blob) => void;
@@ -10,7 +11,7 @@ type RecordButtonProps = {
 export const RecordButton = ({ onTranscriptUpdate }: RecordButtonProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { startRecording, stopRecording } = useVoiceRecognition({
+  const { startRecording, stopRecording, audioStream } = useVoiceRecognition({
     onResult: (blob) => {
       onTranscriptUpdate(blob);
     },
@@ -39,7 +40,12 @@ export const RecordButton = ({ onTranscriptUpdate }: RecordButtonProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-4">
+    {isRecording && audioStream && (
+      <div className="w-full">
+        <Waveform audioStream={audioStream} />
+      </div>
+    )}
       <button
         onClick={handleClick}
         className={`w-full px-8 py-3 rounded-lg flex justify-center items-center text-white font-medium transition-colors ${

@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { VoiceRecognitionConfig, VoiceRecognitionHook, AudioRecordingState } from '../types/webSpeechAPI';
 
 export const useVoiceRecognition = ({ onResult }: VoiceRecognitionConfig): VoiceRecognitionHook => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const [recordingState, setRecordingState] = useState<AudioRecordingState>('inactive');
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
   
   const isSupported = typeof window !== 'undefined' && 
     ('MediaRecorder' in window);
@@ -22,7 +23,7 @@ export const useVoiceRecognition = ({ onResult }: VoiceRecognitionConfig): Voice
       console.log('Requesting microphone permission...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('Microphone permission granted, creating MediaRecorder...');
-      
+      setAudioStream(stream);
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -42,6 +43,7 @@ export const useVoiceRecognition = ({ onResult }: VoiceRecognitionConfig): Voice
         onResult(blob);
         chunksRef.current = [];
         console.log('Stopping audio tracks...');
+        setAudioStream(null);
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -83,9 +85,20 @@ export const useVoiceRecognition = ({ onResult }: VoiceRecognitionConfig): Voice
     }
   }, [recordingState]);
 
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (audioStream) {
+        audioStream.getTracks().forEach(track => track.stop());
+        setAudioStream(null);
+      }
+    };
+  }, []);
+
   return {
     startRecording,
     stopRecording,
     isSupported,
+    audioStream,
   };
 };
