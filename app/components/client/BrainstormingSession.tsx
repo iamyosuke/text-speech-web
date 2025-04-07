@@ -53,35 +53,37 @@ export const BrainstormingSession = ({ onTranscriptUpdate }: BrainstormingSessio
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-bold mb-4">New Project</h2>
         
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 flex items-center">
-          <div className="text-blue-500 mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <line x1="12" y1="19" x2="12" y2="22"></line>
-            </svg>
-          </div>
-          <div>Press Start Recording to begin speaking</div>
-        </div>
-        
-        <div className="flex justify-center mb-4">
-          <RecordingSection 
-            onTranscriptUpdate={handleUpdate}
-          />
-        </div>
-
         {messages.length === 0 && !isProcessing && (
-          <div className="text-center text-gray-500 mt-8">
+          <div className="text-center text-gray-500 mb-8">
             <p>Use voice input to brainstorm with AI.</p>
             <p>Click &ldquo;Start Recording&rdquo; to begin.</p>
           </div>
         )}
 
-        <div className="mt-6">
+        <div className="mb-6 h-[400px] overflow-y-auto">
           <ChatHistory 
             messages={messages}
             isProcessing={isProcessing}
           />
+        </div>
+
+        <div className="border-t pt-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 flex items-center">
+            <div className="text-blue-500 mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+              </svg>
+            </div>
+            <div>Press Start Recording to begin speaking</div>
+          </div>
+          
+          <div className="flex justify-center">
+            <RecordingSection 
+              onTranscriptUpdate={handleUpdate}
+            />
+          </div>
         </div>
       </div>
     </div>
