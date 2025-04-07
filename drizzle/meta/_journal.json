@@ -29,6 +29,20 @@
       "when": 1743919471091,
       "tag": "0003_sturdy_black_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1744036755576,
+      "tag": "0004_clean_shatterstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1744037020424,
+      "tag": "0005_free_vargas",
+      "breakpoints": true
     }
   ]
 }

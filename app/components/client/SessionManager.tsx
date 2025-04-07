@@ -1,7 +1,8 @@
 'use client';
 
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { Layout } from '../molecules/Layout';
+import { useRouter } from 'next/navigation';
 
 interface Session {
   id: string;
@@ -11,18 +12,29 @@ interface Session {
 
 interface SessionManagerProps {
   sessions: Session[];
+  initialSessionId?: string;
   children: React.ReactNode;
 }
 
-export const SessionManager: FC<SessionManagerProps> = ({ sessions, children }) => {
+export const SessionManager: FC<SessionManagerProps> = ({ 
+  sessions, 
+  initialSessionId,
+  children 
+}) => {
+  const router = useRouter();
+  const [activeSessionId, setActiveSessionId] = useState<string>(
+    initialSessionId || (sessions[0]?.id || '1')
+  );
+  const handleSessionSelect = (id: string) => {
+    setActiveSessionId(id);
+    router.push(`/session/${id}`);
+  };
+
   return (
     <Layout
       sessions={sessions}
-      activeSessionId="1"
-      onSessionSelect={(id) => {
-        // This will be implemented later with real navigation
-        console.log('Selected session:', id);
-      }}
+      activeSessionId={activeSessionId}
+      onSessionSelect={handleSessionSelect}
     >
       {children}
     </Layout>

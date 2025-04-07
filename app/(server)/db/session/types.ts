@@ -1,15 +1,16 @@
+import { TranscriptData } from "../transcript/types";
+
 export interface SessionData {
   id: string;
-  transcriptId: string;
+  title: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface SessionWithTranscript extends SessionData {
-  title: string;
-  content: string;
+  transcripts: TranscriptData[];
 }
 
 export interface CreateSessionParams {
-  transcriptId: string;
+  title: string;
 }

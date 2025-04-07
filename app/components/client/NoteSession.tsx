@@ -1,16 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RecordingSection } from './RecordingSection';
 import type { TranscriptionResult } from '@/app/(server)/actions/processTranscript';
+import type { SessionWithTranscript } from '@/app/(server)/db/session/types';
 
 interface NoteSessionProps {
-  onTranscriptUpdate: (audioData: Blob, transcription: TranscriptionResult) => Promise<void>;
+  sessionId: string;
+  initialData?: SessionWithTranscript;
+  onTranscriptUpdate: (sessionId: string, audioData: Blob, transcription: TranscriptionResult) => Promise<void>;
 }
 
-export const NoteSession = ({ onTranscriptUpdate }: NoteSessionProps) => {
+export const NoteSession = ({ 
+  sessionId, 
+  initialData,
+  onTranscriptUpdate 
+}: NoteSessionProps) => {
   const [notes, setNotes] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (initialData?.transcripts) {
+      setNotes(initialData.transcripts.map(t => t.content));
+    } else {
+      setNotes([]);
+    }
+  }, [initialData, sessionId]);
 
   const handleUpdate = async (audioData: Blob, transcription: TranscriptionResult) => {
     try {
@@ -20,8 +35,8 @@ export const NoteSession = ({ onTranscriptUpdate }: NoteSessionProps) => {
         setNotes(prev => [...prev, transcription.transcript]);
       }
       
-      // データを保存
-      await onTranscriptUpdate(audioData, transcription);
+      // データを保存（セッションIDを含める）
+      await onTranscriptUpdate(sessionId, audioData, transcription);
     } catch (error) {
       console.error('Error in handleUpdate:', error);
     } finally {
