@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { RecordingSection } from './RecordingSection';
-import { TranscriptDisplay } from '../molecules/TranscriptDisplay';
-import { AIResponseDisplay } from '../molecules/AIResponseDisplay';
+import { ChatHistory, type ChatMessage } from '../molecules/ChatHistory';
 import type { AIResponse } from '@/app/(server)/actions/processTranscript';
 
 interface BrainstormingSessionProps {
@@ -11,28 +10,39 @@ interface BrainstormingSessionProps {
 }
 
 export const BrainstormingSession = ({ onTranscriptUpdate }: BrainstormingSessionProps) => {
-  const [currentTranscript, setCurrentTranscript] = useState('');
-  const [currentAIResponse, setCurrentAIResponse] = useState<AIResponse | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleUpdate = async (audioData: Blob, aiResponse: AIResponse) => {
     try {
       setIsProcessing(true);
       
-      // 文字起こし結果を表示
-      setCurrentTranscript(aiResponse.transcript || '');
+      // トランスクリプトとAI応答をメッセージリストに追加
+      if (aiResponse.transcript) {
+        setMessages(prev => [...prev, {
+          type: 'transcript',
+          content: aiResponse.transcript || '',
+          timestamp: new Date()
+        }]);
+      }
       
-      // AI分析結果を表示
-      setCurrentAIResponse(aiResponse);
+      if (aiResponse.response) {
+        setMessages(prev => [...prev, {
+          type: 'ai',
+          content: aiResponse.response,
+          timestamp: new Date()
+        }]);
+      }
       
       // データを保存
       await onTranscriptUpdate(audioData, aiResponse);
     } catch (error) {
       console.error('Error in handleUpdate:', error);
-      setCurrentAIResponse({
-        response: '',
-        error: 'データの処理中にエラーが発生しました。'
-      });
+      setMessages(prev => [...prev, {
+        type: 'ai',
+        content: 'データの処理中にエラーが発生しました。',
+        timestamp: new Date()
+      }]);
     } finally {
       setIsProcessing(false);
     }
@@ -60,36 +70,19 @@ export const BrainstormingSession = ({ onTranscriptUpdate }: BrainstormingSessio
           />
         </div>
 
-        {!currentAIResponse && !isProcessing && (
+        {messages.length === 0 && !isProcessing && (
           <div className="text-center text-gray-500 mt-8">
             <p>Use voice input to brainstorm with AI.</p>
             <p>Click &ldquo;Start Recording&rdquo; to begin.</p>
           </div>
         )}
 
-        {isProcessing && (
-          <div className="text-center text-blue-500 mt-8">
-            <p>処理中...</p>
-          </div>
-        )}
-
-        {currentTranscript && (
-          <div className="mt-6">
-            <TranscriptDisplay 
-              transcript={currentTranscript}
-              isProcessing={isProcessing}
-            />
-          </div>
-        )}
-        
-        {currentAIResponse && (
-          <div className="mt-4">
-            <AIResponseDisplay 
-              response={currentAIResponse.response || ''}
-              error={currentAIResponse.error}
-            />
-          </div>
-        )}
+        <div className="mt-6">
+          <ChatHistory 
+            messages={messages}
+            isProcessing={isProcessing}
+          />
+        </div>
       </div>
     </div>
   );
