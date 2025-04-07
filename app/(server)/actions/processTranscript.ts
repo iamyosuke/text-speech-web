@@ -14,6 +14,8 @@ export async function createNewSession(title: string = 'New Session') {
   return await sessionRepo.create({ title });
 }
 
+
+
 export async function processAudioData(audioBlob: Blob): Promise<TranscriptionResult> {
   try {
     const processor = new AudioProcessor();

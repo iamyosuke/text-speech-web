@@ -8,7 +8,7 @@ import type { SessionWithTranscript } from '@/app/(server)/db/session/types';
 interface NoteSessionProps {
   sessionId: string;
   initialData?: SessionWithTranscript;
-  onTranscriptUpdate: (sessionId: string, audioData: Blob, transcription: TranscriptionResult) => Promise<void>;
+  onTranscriptUpdate: (audioData: Blob, transcription: TranscriptionResult) => Promise<void>;
 }
 
 export const NoteSession = ({ 
@@ -35,8 +35,7 @@ export const NoteSession = ({
         setNotes(prev => [...prev, transcription.transcript]);
       }
       
-      // データを保存（セッションIDを含める）
-      await onTranscriptUpdate(sessionId, audioData, transcription);
+      await onTranscriptUpdate(audioData, transcription);
     } catch (error) {
       console.error('Error in handleUpdate:', error);
     } finally {
