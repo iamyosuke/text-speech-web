@@ -1,29 +1,26 @@
-import { FC } from 'react';
+'use client';
+import { usePathname } from 'next/navigation';
+import { Session } from '@/app/lib/type';
+import Link from 'next/link';
 
-interface SessionListItemProps {
-  title: string;
-  date: string;
-  isActive?: boolean;
-  onClick?: () => void;
-}
-
-export const SessionListItem: FC<SessionListItemProps> = ({
-  title,
-  date,
-  isActive = false,
-  onClick,
+export const SessionListItem = ({
+  session,
+}: {
+  session: Session;
 }) => {
+  const pathname = usePathname();
+  const isActive = pathname === `/session/${session.id}`;
   return (
-    <button
-      onClick={onClick}
+    <Link
+      href={`/session/${session.id}`}
       className={`w-full text-left p-3 rounded-lg transition-colors ${
         isActive
           ? 'bg-blue-50 border border-blue-200'
           : 'hover:bg-gray-100'
       }`}
     >
-      <h3 className="font-medium text-gray-800 truncate">{title}</h3>
-      <p className="text-sm text-gray-500 mt-1">{date}</p>
-    </button>
+      <h3 className="font-medium text-gray-800 truncate">{session.title}</h3>
+      <p className="text-sm text-gray-500 mt-1">{session.createdAt.toLocaleDateString()}</p>
+    </Link>
   );
 };

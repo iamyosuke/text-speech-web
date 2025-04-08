@@ -5,14 +5,15 @@ import { Mic } from "lucide-react"
 import { Waveform } from "./Waveform"
 import { useVoiceRecognition } from "@/app/hooks/useVoiceRecognition"
 import { Button } from "@/app/components/ui/button"
-import { processAudioData, saveTranscript } from '@/app/(server)/actions/processTranscript'
+import { generateTranscriptAction } from "@/app/(server)/actions/generateTranscriptAction"
+import { useRouter } from "next/navigation"
 
 interface RecordButtonProps {
   sessionId: string;
-  onNoteUpdate: (transcript: string) => void;
 }
 
-export const RecordButton = ({ sessionId, onNoteUpdate }: RecordButtonProps) => {
+export const RecordButton = ({ sessionId }: RecordButtonProps) => {
+  const router = useRouter()
   const [isRecording, setIsRecording] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,12 +24,13 @@ export const RecordButton = ({ sessionId, onNoteUpdate }: RecordButtonProps) => 
         setIsProcessing(true)
         console.log('Starting audio processing...')
         
-        const transcription = await processAudioData(audioBlob)
+        const transcription = await generateTranscriptAction(audioBlob, sessionId)
         console.log('Transcription received:', transcription)
         
-        if (transcription.transcript) {
-          await saveTranscript(sessionId, audioBlob, transcription.transcript)
-          onNoteUpdate(transcription.transcript)
+        if (!sessionId && transcription.data?.sessionId) {
+          router.push(`/session/${transcription.data.sessionId}`)
+        } else {
+          router.refresh()
         }
         
         console.log('Transcript update completed')

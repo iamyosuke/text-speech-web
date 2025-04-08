@@ -2,29 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { RecordButton } from '../atoms/RecordButton';
-import type { SessionWithTranscript } from '../../(server)/db/session/types';
+import { SessionWithTranscript } from '@/app/lib/type';
 
-interface NoteSessionProps {
-  sessionId: string;
-  initialData?: SessionWithTranscript;
-}
-
-export const NoteSession = ({ sessionId, initialData }: NoteSessionProps) => {
+export const NoteSession = ({ session }: { session: SessionWithTranscript | null}) => {
   const [notes, setNotes] = useState<string[]>([]);
 
   useEffect(() => {
-    if (initialData?.transcripts) {
-      setNotes(initialData.transcripts.map(t => t.content));
-    } else {
-      setNotes([]);
+    if (session) {
+      setNotes(session.transcripts.map(t => t.content));
     }
-  }, [initialData, sessionId]);
+  }, [session]);
 
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-bold mb-4">Voice Note</h2>
-        
 
         <div className="mb-6 h-[400px] overflow-y-auto">
           <div className="space-y-4">
@@ -47,14 +39,9 @@ export const NoteSession = ({ sessionId, initialData }: NoteSessionProps) => {
             </div>
             <div>Press Start Recording to begin speaking</div>
           </div>
-          
+
           <div className="flex justify-center">
-            <RecordButton 
-              sessionId={sessionId}
-              onNoteUpdate={(transcript) => {
-                setNotes(prev => [...prev, transcript]);
-              }}
-            />
+            <RecordButton sessionId={session?.id || ""} />
           </div>
         </div>
       </div>

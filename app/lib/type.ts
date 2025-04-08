@@ -6,3 +6,7 @@ export type CreateTranscript = InferInsertModel<typeof transcripts>;
 
 export type Session = InferSelectModel<typeof sessions>;
 export type CreateSession = InferInsertModel<typeof sessions>;
+
+export type SessionWithTranscript = Session & {
+  transcripts: Transcript[];
+};

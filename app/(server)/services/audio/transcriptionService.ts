@@ -1,47 +1,45 @@
-import { AudioProcessor } from './audioProcessor';
-import { TranscriptRepository } from '../../db/transcript/repository';
-import { SessionRepository } from '../../db/session/repository';
+'server only'
 
-export class TranscriptionService {
-  constructor(
-    private audioProcessor: AudioProcessor,
-    private transcriptRepo: TranscriptRepository,
-    private sessionRepo: SessionRepository
-  ) {}
+import { createSession } from '../../db/session';
+import { createTranscript } from '../../db/transcript';
+import { transcribe } from './audioProcessor';
 
-  async processAudio(audioBlob: Blob) {
-    try {
-      // 1. 音声の文字起こし
-      const transcript = await this.audioProcessor.transcribe(audioBlob);
-      
-      // 2. 文字起こしテキストの分析
-      const analysis = await this.audioProcessor.analyze(transcript);
-      
-      // 3. DBへの保存
-      const transcriptRecord = await this.transcriptRepo.create({
-        content: transcript,
-        analysis
+// 音声処理
+export const processAudio = async (
+  audioBlob: Blob,
+  sessionId: string
+) => {
+  try {
+    // 1. 音声の文字起こし
+    const transcript = await transcribe(audioBlob);
+
+    if (!sessionId) {
+      const session = await createSession({
+        title: 'New Session',
       });
-      
-      const session = await this.sessionRepo.create({
-        transcriptId: transcriptRecord.id
-      });
-
-      // 4. レスポンスの返却
-      return {
-        success: true,
-        data: {
-          transcript,
-          analysis,
-          sessionId: session.id
-        }
-      };
-    } catch (error) {
-      console.error('Error in processAudio:', error);
-      return {
-        success: false,
-        error: 'Failed to process audio'
-      };
+      sessionId = session.id;
     }
+    
+    // 3. DBへの保存
+    await createTranscript({
+      content: transcript,
+      sessionId: sessionId,
+    });
+    
+
+    // 4. レスポンスの返却
+    return {
+      success: true,
+      data: {
+        transcript,
+        sessionId: sessionId
+      }
+    };
+  } catch (error) {
+    console.error('Error in processAudio:', error);
+    return {
+      success: false,
+      error: 'Failed to process audio'
+    };
   }
-}
+};
