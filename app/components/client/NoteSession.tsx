@@ -25,12 +25,6 @@ export const NoteSession = ({ sessionId, initialData }: NoteSessionProps) => {
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-bold mb-4">Voice Note</h2>
         
-        {notes.length === 0 && !isProcessing && (
-          <div className="text-center text-gray-500 mb-8">
-            <p>Use voice input to create notes.</p>
-            <p>Click &quot;Start Recording&quot; to begin.</p>
-          </div>
-        )}
 
         <div className="mb-6 h-[400px] overflow-y-auto">
           <div className="space-y-4">
