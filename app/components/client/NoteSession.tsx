@@ -28,7 +28,7 @@ export const NoteSession = ({ sessionId, initialData }: NoteSessionProps) => {
         {notes.length === 0 && !isProcessing && (
           <div className="text-center text-gray-500 mb-8">
             <p>Use voice input to create notes.</p>
-            <p>Click "Start Recording" to begin.</p>
+            <p>Click &quot;Start Recording&quot; to begin.</p>
           </div>
         )}
 
