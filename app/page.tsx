@@ -1,6 +1,8 @@
 import { NoteSession } from './components/client/NoteSession';
 import { SessionList } from './components/molecules/SessionList';
+import { redirect } from 'next/navigation';
 export default async function Home() {
+  redirect('/session');
   return (
     <div className="min-h-screen bg-white">
       <SessionList />
