@@ -93,7 +93,7 @@ export const useVoiceRecognition = ({ onResult }: VoiceRecognitionConfig): Voice
         setAudioStream(null);
       }
     };
-  }, []);
+  }, [audioStream]);
 
   return {
     startRecording,

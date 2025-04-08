@@ -1,5 +1,4 @@
 import { NoteSession } from './components/client/NoteSession';
-import { getSessionWithTranscripts } from './(server)/db/session';
 import { SessionList } from './components/molecules/SessionList';
 export default async function Home() {
   return (

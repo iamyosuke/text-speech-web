@@ -6,7 +6,7 @@ interface WaveformProps {
 
 export const Waveform = ({ audioStream }: WaveformProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
   const analyserRef = useRef<AnalyserNode | null>(null);
 
   useEffect(() => {
