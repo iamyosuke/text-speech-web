@@ -1,7 +1,10 @@
 import HeroSection from '@/components/hero-section';
-import { redirect } from 'next/navigation';
+import Pricing from '@/components/pricing';
 export default async function Home() {
   return (
-    <HeroSection />
+    <>
+      <HeroSection />
+      <Pricing />
+    </>
   );
 }
