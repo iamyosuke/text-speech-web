@@ -1,21 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { RecordingSection } from './RecordingSection';
-import type { TranscriptionResult } from '@/app/(server)/actions/processTranscript';
+import { RecordButton } from '../atoms/RecordButton';
 import type { SessionWithTranscript } from '@/app/(server)/db/session/types';
 
 interface NoteSessionProps {
   sessionId: string;
   initialData?: SessionWithTranscript;
-  onTranscriptUpdate: (audioData: Blob, transcription: TranscriptionResult) => Promise<void>;
 }
 
-export const NoteSession = ({ 
-  sessionId, 
-  initialData,
-  onTranscriptUpdate 
-}: NoteSessionProps) => {
+export const NoteSession = ({ sessionId, initialData }: NoteSessionProps) => {
   const [notes, setNotes] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -26,22 +20,6 @@ export const NoteSession = ({
       setNotes([]);
     }
   }, [initialData, sessionId]);
-
-  const handleUpdate = async (audioData: Blob, transcription: TranscriptionResult) => {
-    try {
-      setIsProcessing(true);
-      
-      if (transcription.transcript) {
-        setNotes(prev => [...prev, transcription.transcript]);
-      }
-      
-      await onTranscriptUpdate(audioData, transcription);
-    } catch (error) {
-      console.error('Error in handleUpdate:', error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -83,8 +61,13 @@ export const NoteSession = ({
           </div>
           
           <div className="flex justify-center">
-            <RecordingSection 
-              onTranscriptUpdate={handleUpdate}
+            <RecordButton 
+              sessionId={sessionId}
+              onNoteUpdate={(transcript) => {
+                setIsProcessing(true);
+                setNotes(prev => [...prev, transcript]);
+                setIsProcessing(false);
+              }}
             />
           </div>
         </div>

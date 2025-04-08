@@ -5,18 +5,39 @@ import { Mic } from "lucide-react"
 import { Waveform } from "./Waveform"
 import { useVoiceRecognition } from "@/app/hooks/useVoiceRecognition"
 import { Button } from "@/app/components/ui/button"
+import { processAudioData, saveTranscript } from '@/app/(server)/actions/processTranscript'
 
-type RecordButtonProps = {
-  onTranscriptUpdate: (audioBlob: Blob) => void
+interface RecordButtonProps {
+  sessionId: string;
+  onNoteUpdate: (transcript: string) => void;
 }
 
-export const RecordButton = ({ onTranscriptUpdate }: RecordButtonProps) => {
+export const RecordButton = ({ sessionId, onNoteUpdate }: RecordButtonProps) => {
   const [isRecording, setIsRecording] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [recordingTime, setRecordingTime] = useState(0)
   const { startRecording, stopRecording, audioStream } = useVoiceRecognition({
-    onResult: (blob) => {
-      onTranscriptUpdate(blob)
+    onResult: async (audioBlob) => {
+      try {
+        setIsProcessing(true)
+        console.log('Starting audio processing...')
+        
+        const transcription = await processAudioData(audioBlob)
+        console.log('Transcription received:', transcription)
+        
+        if (transcription.transcript) {
+          await saveTranscript(sessionId, audioBlob, transcription.transcript)
+          onNoteUpdate(transcription.transcript)
+        }
+        
+        console.log('Transcript update completed')
+      } catch (err) {
+        console.error('Error processing audio:', err)
+        setError(err instanceof Error ? err.message : "音声処理中にエラーが発生しました")
+      } finally {
+        setIsProcessing(false)
+      }
     },
   })
 
@@ -98,11 +119,18 @@ export const RecordButton = ({ onTranscriptUpdate }: RecordButtonProps) => {
               : "bg-gradient-to-br from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
           }`}
           onClick={handleClick}
+          disabled={isProcessing}
           aria-label={isRecording ? "Stop Recording" : "Start Recording"}
         >
           <Mic className="h-12 w-12 text-white" />
         </Button>
       </div>
+
+      {isProcessing && (
+        <div className="text-sm text-gray-600">
+          処理中...
+        </div>
+      )}
 
       {error && (
         <div className="text-red-500 text-sm mt-2 max-w-md text-center">
