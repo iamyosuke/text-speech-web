@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { RecordButton } from '../atoms/RecordButton';
-import type { SessionWithTranscript } from '@/app/(server)/db/session/types';
+import type { SessionWithTranscript } from '../../(server)/db/session/types';
 
 interface NoteSessionProps {
   sessionId: string;
@@ -11,7 +11,6 @@ interface NoteSessionProps {
 
 export const NoteSession = ({ sessionId, initialData }: NoteSessionProps) => {
   const [notes, setNotes] = useState<string[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (initialData?.transcripts) {
@@ -37,14 +36,9 @@ export const NoteSession = ({ sessionId, initialData }: NoteSessionProps) => {
           <div className="space-y-4">
             {notes.map((note, index) => (
               <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                <p>{note}</p>
+                {note}
               </div>
             ))}
-            {isProcessing && (
-              <div className="text-center text-gray-500">
-                Processing voice input...
-              </div>
-            )}
           </div>
         </div>
 
@@ -64,9 +58,7 @@ export const NoteSession = ({ sessionId, initialData }: NoteSessionProps) => {
             <RecordButton 
               sessionId={sessionId}
               onNoteUpdate={(transcript) => {
-                setIsProcessing(true);
                 setNotes(prev => [...prev, transcript]);
-                setIsProcessing(false);
               }}
             />
           </div>
