@@ -10,6 +10,7 @@ export async function POST(req: Request) {
     if (evt.type === 'user.created') {
       await db.insert(users).values({
         clerkId: evt.data.id,
+        email: evt.data.email_addresses[0].email_address,
       });
 
       console.log('User created:', evt.data.id);
