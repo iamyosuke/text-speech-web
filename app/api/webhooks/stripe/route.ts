@@ -57,14 +57,19 @@ async function handleSubscriptionEvent(
 
       await db
         .update(users)
-        .set({ subscription: null })
+        .set({ subscriptionId: null })
         .where(eq(users.email, customerEmail));
     } else {
       if (type === "created") {
-        await db
+        const newSubscription = await db
           .insert(subscriptions)
           .values(subscriptionData)
           .returning();
+        
+        await db
+          .update(users)
+          .set({ subscriptionId: newSubscription[0].id })
+          .where(eq(users.email, customerEmail));
       } else {
         await db
           .update(subscriptions)

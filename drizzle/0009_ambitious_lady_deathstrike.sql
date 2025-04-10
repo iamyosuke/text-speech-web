@@ -1,0 +1,1 @@
+ALTER TABLE "text_speech_web"."users" RENAME COLUMN "subscription" TO "subscription_id";

@@ -11,7 +11,7 @@ export const users = mySchema.table('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   clerkId: text('clerk_id').notNull().unique(),
   email: text('email').unique(),
-  subscription: text('subscription'),
+  subscriptionId: text('subscription_id'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
